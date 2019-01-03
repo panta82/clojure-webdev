@@ -32,7 +32,7 @@
               "+" (+ a b)
               "-" (- a b)
               "*" (* a b)
-              "/" (/ a b)
+              ":" (/ a b)
               nil)]
     (if (nil? res)
       {:status 400 :body (str "Invalid operation " op)}
