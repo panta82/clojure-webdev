@@ -9,4 +9,6 @@
   :main webdev.core
   :min-lein-version "2.0.0"
   :uberjar-name "webdev.jar"
-  :profiles {:dev {:main webdev.core/-dev-main}})
+  :profiles {:dev
+             {:source-paths ["src" "dev"]
+              :main webdev.dev}})
