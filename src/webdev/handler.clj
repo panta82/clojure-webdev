@@ -1,20 +1,13 @@
 (ns webdev.handler
   (:require
-   [webdev.model :refer [create-item set-item-checked delete-item list-items]]))
+   [webdev.model :refer [create-item set-item-checked delete-item list-items]]
+   [webdev.view :refer [items-page]]))
 
 (defn handle-index-items [req]
   (let [db (:webdev/db req)
         items (list-items db)]
     {:status 200
-     :body (str
-            "<html><body>"
-            (mapv :name items)
-            "<form method=\"POST\" action=\"/items\">
-            <input type=text name=name placeholder=name />
-            <input type=text name=description placeholder=description />
-            <input type=submit />
-            </form>"
-            "</body></html")}))
+     :body (items-page items)}))
 
 (defn handle-create-item [req]
   (let [db (:webdev/db req)

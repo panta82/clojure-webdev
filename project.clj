@@ -8,7 +8,8 @@
                  [compojure "1.6.1"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/java.jdbc "0.7.8"]
-                 [org.postgresql/postgresql "42.2.5"]]
+                 [org.postgresql/postgresql "42.2.5"]
+                 [hiccup "1.0.5"]]
   :main webdev.core
   :min-lein-version "2.0.0"
   :uberjar-name "webdev.jar"

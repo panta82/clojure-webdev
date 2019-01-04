@@ -4,6 +4,8 @@
   (:require [ring.adapter.jetty :as jetty]
             [ring.handler.dump :refer [handle-dump]]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.resource :refer [wrap-resource]]
+            [ring.middleware.file-info :refer [wrap-file-info]]
             [compojure.core :refer [defroutes GET POST ANY]]
             [compojure.route :as route]))
 
@@ -70,9 +72,12 @@
 
 (def app
   (wrap-server-name
-   (wrap-db
-    (wrap-params
-     routes))))
+   (wrap-file-info
+    (wrap-resource
+     (wrap-db
+      (wrap-params
+       routes))
+     "static"))))
 
 (defn args-to-options [args]
   {:port (nth args 0 3000)})
