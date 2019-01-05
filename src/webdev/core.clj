@@ -6,7 +6,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.file-info :refer [wrap-file-info]]
-            [compojure.core :refer [defroutes GET POST ANY]]
+            [compojure.core :refer [defroutes GET POST DELETE ANY]]
             [compojure.route :as route]))
 
 (def db "jdbc:postgresql://localhost/webdev?password=qweasd")
@@ -56,6 +56,7 @@
 
   (GET "/items" [] handler/handle-index-items)
   (POST "/items" [] handler/handle-create-item)
+  (DELETE "/items/:item-id" [] handler/handle-delete-item)
 
   (route/not-found "Not found"))
 
@@ -70,14 +71,29 @@
   (fn [req]
     (handler (assoc req :webdev/db db))))
 
+(def sim-methods
+  {"PUT" :put
+   "DELETE" :delete})
+
+(defn wrap-simulated-methods [handler]
+  (fn [req]
+    (if-let
+     [method
+      (and
+       (= :post (:request-method req))
+       (sim-methods (get-in :req [:params "_method"])))]
+      (handler (assoc req :request-method method))
+      (handler req))))
+
 (def app
-  (wrap-server-name
-   (wrap-file-info
-    (wrap-resource
-     (wrap-db
-      (wrap-params
-       routes))
-     "static"))))
+  (wrap-simulated-methods
+   (wrap-server-name
+    (wrap-file-info
+     (wrap-resource
+      (wrap-db
+       (wrap-params
+        routes))
+      "static")))))
 
 (defn args-to-options [args]
   {:port (nth args 0 3000)})

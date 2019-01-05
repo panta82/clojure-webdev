@@ -15,3 +15,13 @@
         created-id (create-item db (get payload "name") (get payload "description"))]
     {:status 302
      :headers {"Location" (str "/items")}}))
+
+(defn handle-delete-item [req]
+  (let [db (:webdev/db req)
+        item-id (java.util.UUID/fromString (:item-id (:route-params req)))
+        deleted (delete-item db item-id)]
+    (if deleted
+      {:status 302
+       :headers {"Location" "/items"}}
+      {:status 404
+       :body "List item not found"})))
