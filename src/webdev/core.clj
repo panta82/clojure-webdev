@@ -6,7 +6,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.file-info :refer [wrap-file-info]]
-            [compojure.core :refer [defroutes GET POST DELETE ANY]]
+            [compojure.core :refer [defroutes GET POST PUT DELETE ANY]]
             [compojure.route :as route]))
 
 (def db "jdbc:postgresql://localhost/webdev?password=qweasd")
@@ -57,6 +57,7 @@
   (GET "/items" [] handler/handle-index-items)
   (POST "/items" [] handler/handle-create-item)
   (DELETE "/items/:item-id" [] handler/handle-delete-item)
+  (PUT "/items/:item-id/checked" [] handler/handle-set-item-checked)
 
   (route/not-found "Not found"))
 

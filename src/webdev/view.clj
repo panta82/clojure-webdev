@@ -52,12 +52,22 @@
        [:table.table.table-stripped
         [:thead
          [:tr
-          [:th "Name"]
-          [:th "Description"]
-          [:th ""]]]
+          [:th {:style "width:0"} ""]
+          [:th {:style "width:50%"} "Name"]
+          [:th {:style "width:50%"} "Description"]
+          [:th {:style "width:0"} ""]]]
         [:tbody
          (for [i items]
            [:tr
+            [:td
+             [:form
+              {:action (str "/items/" (:id i) "/checked")
+               :method "POST"}
+              [:input {:type "hidden" :name "_method" :value "PUT"}]
+              [:input {:type "hidden" :name "checked" :value (if (:checked i) "" "checked")}]
+              (if (:checked i)
+                [:button.btn.btn-light.btn-sm {:type "submit" :title "Check"} "☑ Uncheck"]
+                [:button.btn.btn-light.btn-sm {:type "submit" :title "Uncheck"} "☐ Check"])]]
             [:td (h (:name i))]
             [:td (h (:description i))]
             [:td

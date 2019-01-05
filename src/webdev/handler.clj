@@ -25,3 +25,14 @@
        :headers {"Location" "/items"}}
       {:status 404
        :body "List item not found"})))
+
+(defn handle-set-item-checked [req]
+  (let [db (:webdev/db req)
+        item-id (java.util.UUID/fromString (get-in req [:route-params :item-id]))
+        checked (= "checked" (get-in req [:form-params "checked"]))
+        updated (set-item-checked db item-id checked)]
+    (if updated
+      {:status 302
+       :headers {"Location" "/items"}}
+      {:status 404
+       :body "List item not found"})))
