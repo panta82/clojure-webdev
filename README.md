@@ -1,14 +1,9 @@
-# webdev
+# Clojure webdev
 
-A Clojure library designed to ... well, that part is up to you.
+Kind of following:
+https://purelyfunctional.tv/lesson/lets-get-a-server-up-and-running-in-the-cloud/
+https://purelyfunctional.tv/lesson/making-a-complete-app/
 
-## Usage
-
-FIXME
-
-## License
-
-Copyright © 2019 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Related:
+https://panta-clojure1.herokuapp.com/items
+https://stackoverflow.com/questions/54056579/how-to-avoid-global-state-in-clojure-when-using-wrap-reload
