@@ -63,7 +63,7 @@
 
 (defn load-settings [args dev]
   {:port (Integer. (nth args 0 3000))
-   :db (nth args 1 "jdbc:postgresql://localhost/webdev?password=qweasd")
+   :db (nth args 1 "jdbc:postgresql://localhost/webdev")
    :dev dev})
 
 (defn make-reloading-app [settings]
