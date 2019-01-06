@@ -3,63 +3,15 @@
             [webdev.handler :as handler])
   (:require [ring.adapter.jetty :as jetty]
             [ring.handler.dump :refer [handle-dump]]
+            [ring.middleware.reload :as ring-reload]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.file-info :refer [wrap-file-info]]
-            [compojure.core :refer [defroutes GET POST PUT DELETE ANY]]
+            [compojure.core :refer [routes GET POST PUT DELETE ANY]]
             [compojure.route :as route]))
 
-(def db "jdbc:postgresql://localhost/webdev?password=qweasd")
-
-(defn greet [req]
-  {:status 200
-   :body "Hello World"
-   :headers {}})
-
-(defn goodbye [req]
-  {:status 200
-   :body "Goodbye!"})
-
-(defn about [req]
-  {:status 200
-   :body "Why am I adding this? Not exactly super interesting"})
-
-(defn request [req] handle-dump)
-
-(defn greeting [req]
-  {:status 200
-   :body (str "Yo! " (:name (:route-params req)))})
-
-(defn calc [req]
-  (let [params (:route-params req)
-        a (Integer. (:a params))
-        op (:op params)
-        b (Integer. (:b params))
-        res (case op
-              "+" (+ a b)
-              "-" (- a b)
-              "*" (* a b)
-              ":" (/ a b)
-              nil)]
-    (if (nil? res)
-      {:status 400 :body (str "Invalid operation " op)}
-      {:status 200 :body (str a " " op " " b " = " res)})))
-
-(defroutes routes
-  (ANY "/request" [] request)
-
-  (GET "/" [] greet)
-  (GET "/goodbye" [] goodbye)
-  (GET "/about" [] about)
-  (GET "/yo/:name" [] greeting)
-  (GET "/calc/:a/:op/:b" [] calc)
-
-  (GET "/items" [] handler/handle-index-items)
-  (POST "/items" [] handler/handle-create-item)
-  (DELETE "/items/:item-id" [] handler/handle-delete-item)
-  (PUT "/items/:item-id/checked" [] handler/handle-set-item-checked)
-
-  (route/not-found "Not found"))
+; Defeat private defn
+(def reloader #'ring-reload/reloader)
 
 (defn wrap-server-name [handler]
   (fn [req]
@@ -68,7 +20,7 @@
           updated-headers (assoc headers "Server" "Panta")]
       (assoc res :headers updated-headers))))
 
-(defn wrap-db [handler]
+(defn wrap-db [handler db]
   (fn [req]
     (handler (assoc req :webdev/db db))))
 
@@ -86,23 +38,49 @@
       (handler (assoc req :request-method method))
       (handler req))))
 
-(def app
-  (wrap-simulated-methods
-   (wrap-server-name
-    (wrap-file-info
-     (wrap-resource
-      (wrap-db
-       (wrap-params
-        routes))
-      "static")))))
+(defn make-routes [dev]
+  (routes
+   (ANY "/request" [] handle-dump)
 
-(defn args-to-options [args]
-  {:port (nth args 0 3000)})
+   (GET "/items" [] handler/handle-index-items)
+   (POST "/items" [] handler/handle-create-item)
+   (DELETE "/items/:item-id" [] handler/handle-delete-item)
+   (PUT "/items/:item-id/checked" [] handler/handle-set-item-checked)
 
-(defn start-server [app options]
-  (model/create-tables db)
-  (jetty/run-jetty app {:port (Integer. (:port options))}))
+   (route/not-found "Not found")))
+
+(defn make-app [settings]
+  (let
+   [routes (make-routes (:dev settings))]
+    (wrap-simulated-methods
+     (wrap-server-name
+      (wrap-file-info
+       (wrap-resource
+        (wrap-db
+         (wrap-params
+          routes) (:db settings))
+        "static"))))))
+
+(defn load-settings [args dev]
+  {:port (Integer. (nth args 0 3000))
+   :db (nth args 1 "jdbc:postgresql://localhost/webdev?password=qweasd")
+   :dev dev})
+
+(defn make-reloading-app [settings]
+  (let [reload! (reloader ["src"] true)]
+    (fn [request]
+      (reload!)
+      ((make-app settings) request))))
+
+(defn start [settings]
+  (let
+   [app
+    (if (:dev settings)
+      (make-reloading-app settings)
+      (make-app settings))]
+    (println "Running in " (if (:dev settings) "DEVELOPMENT" "PRODUCTION") " mode")
+    (model/create-tables (:db settings))
+    (jetty/run-jetty app {:port (:port settings)})))
 
 (defn -main [& args]
-  (do [(println "Running in PRODUCTION mode")
-       (start-server app (args-to-options args))]))
+  (start (load-settings args false)))

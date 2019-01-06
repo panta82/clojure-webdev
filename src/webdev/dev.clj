@@ -1,8 +1,6 @@
 (ns webdev.dev
   (:require
-   [ring.middleware.reload :refer [wrap-reload]]
-   [webdev.core :refer [start-server app args-to-options]]))
+   [webdev.core :refer [start load-settings]]))
 
 (defn -main [& args]
-  (do [(println "Running in DEV mode")
-       (start-server (wrap-reload #'app) (args-to-options args))]))
+  (start (load-settings args true)))

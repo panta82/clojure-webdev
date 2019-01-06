@@ -77,7 +77,7 @@
               [:input {:type "hidden" :name "_method" :value "DELETE"}]
               [:button.btn.btn-danger.btn-sm {:type "submit" :title "Delete"} "✖"]]]])]]
        [:h5 "There are no items"])
-     [:div
+     [:div.mt-4
       [:h4 "New item"]
       (new-item-form)]]]
    [:script
